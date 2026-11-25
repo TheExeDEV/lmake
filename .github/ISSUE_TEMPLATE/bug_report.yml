@@ -43,7 +43,7 @@ body:
     attributes:
       label: lmake version
       description: Output of `lmake version`
-      placeholder: lmake 0.1.0
+      placeholder: lmake 0.0.1
     validations:
       required: true
 

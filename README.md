@@ -80,9 +80,9 @@ curl -fsSL https://raw.githubusercontent.com/TheExeDEV/lmake/master/installers/i
 Both lines run the same file. It downloads lmake from the latest release into `%LOCALAPPDATA%\lmake\bin` (Windows) or
 `~/.lmake/bin` and adds that folder to `PATH`. Open a new terminal and run `lmake version`.
 
-Options, set before the command: `LMAKE_VERSION=0.1.0` installs a specific version, `LMAKE_INSTALL_DIR` changes the
+Options, set before the command: `LMAKE_VERSION=0.0.1` installs a specific version, `LMAKE_INSTALL_DIR` changes the
 folder, `LMAKE_NO_PATH=1` leaves `PATH` alone, `LMAKE_REPOSITORY=owner/name` downloads from a fork and `LMAKE_BASE_URL`
-from a mirror. In PowerShell: `$env:LMAKE_VERSION = "0.1.0"`.
+from a mirror. In PowerShell: `$env:LMAKE_VERSION = "0.0.1"`.
 
 **Manually:** download `lmake-<platform>` from the latest release, rename it to `lmake` (or `lmake.exe`) and put it on
 your `PATH`.
@@ -419,9 +419,10 @@ Releases publish themselves. The version lives in one place, `<Version>` in `src
 python scripts/release.py bump
 ```
 
-`bump` raises the patch version; it also takes `minor`, `major` or an exact version like `0.3.0`. It writes the version
-into `LMake.csproj` and turns `## [Unreleased]` in `CHANGELOG.md` into `## [0.1.1] - <date>`. Commit and push to
-`master`.
+Versions count up by `0.0.1` and carry over every ten, like an odometer: `0.0.1`, `0.0.2` … `0.0.9`, then `0.1.0`;
+after `0.9.9` comes `1.0.0`. `bump` without arguments picks the next one; it also takes `major`, `minor`, `patch` or an
+exact version like `0.3.0`. It writes the version into `LMake.csproj` and turns `## [Unreleased]` in `CHANGELOG.md` into
+`## [0.0.2] - <date>`. Commit and push to `master`.
 
 On every push to `master` the [Release](.github/workflows/release.yml) workflow checks whether the tag `v<version>`
 exists. If it does not, it:

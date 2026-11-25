@@ -13,6 +13,8 @@ UNRELEASED = "## [Unreleased]"
 VERSION_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)(-[0-9A-Za-z.-]+)?$")
 PROJECT_PATTERN = re.compile(r"(<Version>)([^<]+)(</Version>)")
 PUBLISH = ROOT / "publish"
+ODOMETER_BASE = 10
+BUMP_KINDS = ("next", "major", "minor", "patch")
 
 
 def get_version():
@@ -42,7 +44,20 @@ def get_next(kind):
 	if kind == "minor":
 		return f"{major}.{minor + 1}.0"
 
-	return f"{major}.{minor}.{patch + 1}"
+	if kind == "patch":
+		return f"{major}.{minor}.{patch + 1}"
+
+	patch += 1
+
+	if patch == ODOMETER_BASE:
+		patch = 0
+		minor += 1
+
+	if minor == ODOMETER_BASE:
+		minor = 0
+		major += 1
+
+	return f"{major}.{minor}.{patch}"
 
 
 def write_version(version):
@@ -103,7 +118,7 @@ def command_version(arguments):
 
 
 def command_bump(arguments):
-	target = get_next(arguments.version) if arguments.version in ("major", "minor", "patch") else arguments.version
+	target = get_next(arguments.version) if arguments.version in BUMP_KINDS else arguments.version
 
 	if parse(target) <= parse(get_version()) and "-" not in target:
 		raise SystemExit(f"{target} is not newer than {get_version()}")
@@ -123,8 +138,8 @@ def main():
 
 	commands.add_parser("version", help="print the current version").set_defaults(handler=command_version)
 
-	bump = commands.add_parser("bump", help="set a new version: X.Y.Z, major, minor or patch (default)")
-	bump.add_argument("version", nargs="?", default="patch")
+	bump = commands.add_parser("bump", help="set a new version: next (default, 0.0.9 -> 0.1.0), X.Y.Z, major, minor or patch")
+	bump.add_argument("version", nargs="?", default="next")
 	bump.set_defaults(handler=command_bump)
 
 	publish = commands.add_parser("publish", help="build a self-contained single-file binary for a runtime identifier")
