@@ -1,0 +1,173 @@
+#!/bin/sh
+set `# <#` >/dev/null 2>&1
+
+set -eu
+
+repository="${LMAKE_REPOSITORY:-TheExeDEV/lmake}"
+script_url="https://raw.githubusercontent.com/$repository/master/installers/install"
+version="${LMAKE_VERSION:-latest}"
+install_dir="${LMAKE_INSTALL_DIR:-$HOME/.lmake/bin}"
+config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+case "$(uname -s)" in
+	Linux) system="linux" ;;
+	Darwin) system="osx" ;;
+	MINGW* | MSYS* | CYGWIN*)
+		powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm $script_url | iex"
+		exit $?
+		;;
+	*) echo "lmake does not support $(uname -s) yet." >&2; exit 1 ;;
+esac
+
+case "$(uname -m)" in
+	x86_64 | amd64) architecture="x64" ;;
+	arm64 | aarch64) architecture="arm64" ;;
+	*) echo "lmake does not support the $(uname -m) processor yet." >&2; exit 1 ;;
+esac
+
+asset="lmake-$system-$architecture"
+
+if [ -n "${LMAKE_BASE_URL:-}" ]; then
+	base_url="$LMAKE_BASE_URL"
+elif [ "$version" = "latest" ]; then
+	base_url="https://github.com/$repository/releases/latest/download"
+else
+	base_url="https://github.com/$repository/releases/download/v${version#v}"
+fi
+
+download() {
+	if command -v curl >/dev/null 2>&1; then
+		curl --fail --location --progress-bar --retry 3 --connect-timeout 15 "$1" --output "$2"
+	elif command -v wget >/dev/null 2>&1; then
+		wget --quiet --show-progress --tries=3 --timeout=15 "$1" --output-document="$2"
+	else
+		echo "Install curl or wget first." >&2
+		exit 1
+	fi
+}
+
+mkdir -p "$install_dir"
+target="$install_dir/lmake.download"
+
+echo "Downloading lmake for $system $architecture"
+download "$base_url/$asset" "$target"
+
+chmod +x "$target"
+mv "$target" "$install_dir/lmake"
+
+path_line="export PATH=\"$install_dir:\$PATH\""
+
+add_to_path() {
+	file="$1"
+
+	if [ -f "$file" ] && grep -qF "$install_dir" "$file"; then
+		return
+	fi
+
+	printf '\n%s\n' "$path_line" >> "$file"
+	echo "Added lmake to PATH in $file"
+}
+
+if [ -z "${LMAKE_NO_PATH:-}" ]; then
+	case ":$PATH:" in
+		*":$install_dir:"*) ;;
+		*)
+			shell_name="$(basename "${SHELL:-sh}")"
+
+			if [ -f "$HOME/.bashrc" ] || [ "$shell_name" = "bash" ]; then
+				add_to_path "$HOME/.bashrc"
+			fi
+
+			if [ -f "$HOME/.zshrc" ] || [ "$shell_name" = "zsh" ]; then
+				add_to_path "$HOME/.zshrc"
+			fi
+
+			add_to_path "$HOME/.profile"
+
+			if [ -d "$config_home/fish" ]; then
+				mkdir -p "$config_home/fish/conf.d"
+				echo "fish_add_path $install_dir" > "$config_home/fish/conf.d/lmake.fish"
+			fi
+
+			echo
+			echo "Open a new terminal, or run this to use lmake right now: $path_line"
+			;;
+	esac
+fi
+
+"$install_dir/lmake" version
+
+exit 0
+#>
+
+& {
+	$ErrorActionPreference = "Stop"
+	$ProgressPreference = "SilentlyContinue"
+
+	$repository = if ($env:LMAKE_REPOSITORY) { $env:LMAKE_REPOSITORY } else { "TheExeDEV/lmake" }
+	$scriptUrl = "https://raw.githubusercontent.com/$repository/master/installers/install"
+
+	if ($PSVersionTable.PSEdition -eq "Core" -and -not $IsWindows) {
+		& sh -c "curl -fsSL $scriptUrl | sh"
+		return
+	}
+
+	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+	$version = if ($env:LMAKE_VERSION) { $env:LMAKE_VERSION } else { "latest" }
+	$installDir = if ($env:LMAKE_INSTALL_DIR) { $env:LMAKE_INSTALL_DIR } else { Join-Path $env:LOCALAPPDATA "lmake\bin" }
+	$architecture = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64" -or $env:PROCESSOR_ARCHITEW6432 -eq "ARM64") { "arm64" } else { "x64" }
+	$asset = "lmake-win-$architecture.exe"
+
+	if ($env:LMAKE_BASE_URL) {
+		$baseUrl = $env:LMAKE_BASE_URL
+	} elseif ($version -eq "latest") {
+		$baseUrl = "https://github.com/$repository/releases/latest/download"
+	} else {
+		$baseUrl = "https://github.com/$repository/releases/download/v$($version.TrimStart('v'))"
+	}
+
+	function Get-File($url, $output) {
+		for ($attempt = 1; $attempt -le 3; $attempt++) {
+			try {
+				Invoke-WebRequest -Uri $url -OutFile $output -UseBasicParsing -TimeoutSec 120
+				return
+			} catch {
+				if ($attempt -eq 3) {
+					throw "Could not download $url. Check your internet connection and try again."
+				}
+
+				Start-Sleep -Seconds (2 * $attempt)
+			}
+		}
+	}
+
+	$target = Join-Path $installDir "lmake.exe"
+	$download = "$target.download"
+
+	New-Item -ItemType Directory -Force -Path $installDir | Out-Null
+
+	Write-Host "Downloading lmake for windows $architecture"
+	Get-File "$baseUrl/$asset" $download
+	Move-Item -Path $download -Destination $target -Force
+
+	if (-not $env:LMAKE_NO_PATH) {
+		$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+		$entries = @()
+
+		if ($userPath) {
+			$entries = @($userPath.Split(";") | Where-Object { $_ -ne "" })
+		}
+
+		if ($entries -notcontains $installDir) {
+			[Environment]::SetEnvironmentVariable("Path", (@($entries) + $installDir) -join ";", "User")
+			Write-Host "Added lmake to PATH. Other open terminals need a restart to see it."
+		}
+
+		if (($env:Path.Split(";")) -notcontains $installDir) {
+			$env:Path = "$env:Path;$installDir"
+		}
+	}
+
+	& $target version
+}

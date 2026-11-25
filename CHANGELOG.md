@@ -17,3 +17,6 @@ All notable changes to lmake are documented in this file. The format is based on
   aliases, `init.luau` modules and `@self`.
 - Settings in `lmake.json`: input and output folders, extensions, exclude globs, copying of other files, line endings,
   defines, include folders, prelude files, custom preprocessor syntax and `--#exec`.
+- `installers/install` and `installers/uninstall`: one script for Windows, Linux and macOS that downloads the release
+  binary and adds it to `PATH`, or removes both.
+- Release binaries for Windows and Linux on arm64.

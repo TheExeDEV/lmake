@@ -62,9 +62,15 @@ jobs:
           - os: windows-latest
             runtime: win-x64
             asset: lmake-win-x64.exe
+          - os: windows-latest
+            runtime: win-arm64
+            asset: lmake-win-arm64.exe
           - os: ubuntu-latest
             runtime: linux-x64
             asset: lmake-linux-x64
+          - os: ubuntu-latest
+            runtime: linux-arm64
+            asset: lmake-linux-arm64
           - os: macos-15-intel
             runtime: osx-x64
             asset: lmake-osx-x64

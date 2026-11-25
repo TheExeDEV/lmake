@@ -1,0 +1,125 @@
+#!/bin/sh
+set `# <#` >/dev/null 2>&1
+
+set -eu
+
+repository="${LMAKE_REPOSITORY:-TheExeDEV/lmake}"
+script_url="https://raw.githubusercontent.com/$repository/master/installers/uninstall"
+install_dir="${LMAKE_INSTALL_DIR:-$HOME/.lmake/bin}"
+config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+case "$(uname -s)" in
+	MINGW* | MSYS* | CYGWIN*)
+		powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm $script_url | iex"
+		exit $?
+		;;
+esac
+
+remove_if_empty() {
+	if [ -d "$1" ] && [ -z "$(ls -A "$1")" ]; then
+		rmdir "$1"
+	fi
+}
+
+remove_from_path() {
+	file="$1"
+
+	if [ ! -f "$file" ] || ! grep -qF "$install_dir" "$file"; then
+		return
+	fi
+
+	temporary="$file.lmake-tmp"
+	grep -vF "$install_dir" "$file" > "$temporary" || true
+	cat "$temporary" > "$file"
+	rm -f "$temporary"
+	echo "Removed lmake from PATH in $file"
+}
+
+found=0
+
+for file in lmake lmake.download; do
+	if [ -e "$install_dir/$file" ]; then
+		rm -f "$install_dir/$file"
+		echo "Removed $install_dir/$file"
+		found=1
+	fi
+done
+
+remove_if_empty "$install_dir"
+remove_if_empty "$(dirname "$install_dir")"
+
+for file in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.profile"; do
+	if [ -f "$file" ] && grep -qF "$install_dir" "$file"; then
+		remove_from_path "$file"
+		found=1
+	fi
+done
+
+if [ -f "$config_home/fish/conf.d/lmake.fish" ]; then
+	rm -f "$config_home/fish/conf.d/lmake.fish"
+	found=1
+fi
+
+if [ "$found" -eq 0 ]; then
+	echo "lmake was not found on this computer."
+	exit 0
+fi
+
+echo "Open a new terminal to refresh PATH."
+
+exit 0
+#>
+
+& {
+	$ErrorActionPreference = "Stop"
+
+	$repository = if ($env:LMAKE_REPOSITORY) { $env:LMAKE_REPOSITORY } else { "TheExeDEV/lmake" }
+	$scriptUrl = "https://raw.githubusercontent.com/$repository/master/installers/uninstall"
+
+	if ($PSVersionTable.PSEdition -eq "Core" -and -not $IsWindows) {
+		& sh -c "curl -fsSL $scriptUrl | sh"
+		return
+	}
+
+	$installDir = if ($env:LMAKE_INSTALL_DIR) { $env:LMAKE_INSTALL_DIR } else { Join-Path $env:LOCALAPPDATA "lmake\bin" }
+	$root = Split-Path -Parent $installDir
+	$found = $false
+
+	foreach ($file in @("lmake.exe", "lmake.exe.download")) {
+		$path = Join-Path $installDir $file
+
+		if (Test-Path -LiteralPath $path) {
+			try {
+				Remove-Item -LiteralPath $path -Force
+			} catch {
+				throw "Could not remove $path. Close every program that runs lmake, then try again."
+			}
+
+			Write-Host "Removed $path"
+			$found = $true
+		}
+	}
+
+	foreach ($folder in @($installDir, $root)) {
+		if ((Test-Path -LiteralPath $folder) -and -not (Get-ChildItem -LiteralPath $folder -Force | Select-Object -First 1)) {
+			Remove-Item -LiteralPath $folder -Force
+		}
+	}
+
+	$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+
+	if ($userPath) {
+		$entries = @($userPath.Split(";") | Where-Object { $_ -ne "" })
+		$kept = @($entries | Where-Object { $_.TrimEnd("\") -ne $installDir.TrimEnd("\") })
+
+		if ($kept.Count -ne $entries.Count) {
+			[Environment]::SetEnvironmentVariable("Path", $kept -join ";", "User")
+			Write-Host "Removed lmake from PATH. Open a new terminal to refresh it."
+			$found = $true
+		}
+	}
+
+	if (-not $found) {
+		Write-Host "lmake was not found on this computer."
+	}
+}

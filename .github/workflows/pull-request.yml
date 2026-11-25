@@ -37,3 +37,32 @@ jobs:
 
       - name: Scripts compile
         run: python -m compileall -q scripts
+
+  installers:
+    name: installers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Shell half parses
+        run: |
+          for file in installers/install installers/uninstall; do
+            sed '/^#>$/,$d' "$file" | sh -n
+          done
+
+      - name: PowerShell half parses
+        shell: pwsh
+        run: |
+          $failed = $false
+
+          foreach ($file in "installers/install", "installers/uninstall") {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$null, [ref]$errors) | Out-Null
+
+            foreach ($item in $errors) {
+              Write-Host "${file}:$($item.Extent.StartLineNumber): $($item.Message)"
+              $failed = $true
+            }
+          }
+
+          if ($failed) { exit 1 }
