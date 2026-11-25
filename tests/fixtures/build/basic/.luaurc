@@ -1,0 +1,7 @@
+{
+  "aliases": {
+    "shared": "./src/shared",
+    "pkg": "./packages",
+    "Utils": "@shared/utils",
+  }
+}

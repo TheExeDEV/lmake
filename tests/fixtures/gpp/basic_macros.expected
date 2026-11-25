@@ -1,0 +1,5 @@
+local version = "1.2.3"
+local x = ((1) + ( 2))
+print("debug build", #arr, t[#t])
+local y =  ((3) + ( 4)) 
+local s = ""1.2.3""

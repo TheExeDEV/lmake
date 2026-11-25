@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://github.com/TheExeDEV/lmake#readme
+    about: Directives, lmake.json settings and require conversion are described in the README
+  - name: Changelog
+    url: https://github.com/TheExeDEV/lmake/blob/master/CHANGELOG.md
+    about: Check whether it was already fixed in a newer release

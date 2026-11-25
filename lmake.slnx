@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LMake/LMake.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LMake.Tests/LMake.Tests.csproj" />
+  </Folder>
+</Solution>

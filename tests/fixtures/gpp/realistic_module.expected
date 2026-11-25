@@ -1,0 +1,32 @@
+--!strict
+local Players = game:GetService("Players")
+local Module = {}
+Module.__index = Module
+
+export type State = {
+	count: number,
+	names: { string },
+}
+
+function Module.new(count: number): State
+	if not (count >= 0) then error( "count must be positive", 2) end
+	local self = setmetatable({ count = count, names = {} }, Module)
+		self.isServer = true
+		return self
+end
+
+function Module:describe(): string
+	local version = `{ 2 }.{ 14 }`
+		return string.format("v%s (%d items, %d names)", version, self.count, #self.names)
+	end
+
+function Module:add(name: string)
+	table.insert(self.names, name)
+	print("[" .. "info" .. "]",  name,  #self.names)
+end
+
+for _, player in Players:GetPlayers() do
+	print(player.Name, (function(a, b) return a + b end)(1, 2))
+end
+
+return Module

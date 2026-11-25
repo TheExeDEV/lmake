@@ -1,0 +1,70 @@
+name: Bug report
+description: lmake produced the wrong output, failed on valid input or crashed
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! The smaller the example, the faster it gets fixed.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you ran, what you got, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: source
+    attributes:
+      label: Source that shows it
+      description: The smallest Luau file (with its `--#` directives) that reproduces the problem.
+      render: luau
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Output and messages
+      description: What lmake printed or wrote. If you have the reference `gpp`, its output for the same file helps a lot.
+      render: text
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration
+      description: Your `lmake.json` and the `.luaurc` files involved, if they matter.
+      render: json
+
+  - type: input
+    id: version
+    attributes:
+      label: lmake version
+      description: Output of `lmake version`
+      placeholder: lmake 0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Preprocessor (gpp directives and macros)
+        - Require conversion (.luaurc aliases)
+        - Build (files, output folder, lmake.json)
+        - lmake gpp command line
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - Linux
+        - macOS

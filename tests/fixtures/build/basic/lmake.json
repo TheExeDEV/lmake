@@ -1,0 +1,8 @@
+{
+  "input": "src",
+  "output": "out",
+  "exclude": ["**/*.spec.luau"],
+  "preprocess": {
+    "defines": { "DEBUG": true, "VERSION": "\"1.0.0\"" }
+  }
+}

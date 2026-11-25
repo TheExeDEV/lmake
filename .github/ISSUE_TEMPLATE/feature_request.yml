@@ -1,0 +1,43 @@
+name: Feature request
+description: An idea for lmake, a new setting or a change in how something works
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is hard today
+      description: The build situation where lmake gets in the way or falls short.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you would like
+      description: How it should work. Source before and after, or a `lmake.json` example, makes it clear.
+    validations:
+      required: true
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Example
+      render: luau
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Preprocessor (gpp directives and macros)
+        - Require conversion (.luaurc aliases)
+        - Build (files, output folder, lmake.json)
+        - Command line
+        - Other
+
+  - type: checkboxes
+    id: settings
+    attributes:
+      label: Setting
+      options:
+        - label: This should be a setting that is off by default

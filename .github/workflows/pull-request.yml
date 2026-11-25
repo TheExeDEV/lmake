@@ -1,0 +1,39 @@
+name: Pull request checks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pull-request-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  rules:
+    name: project rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Formatting matches .editorconfig
+        run: |
+          dotnet format whitespace lmake.slnx --verify-no-changes
+          dotnet format style lmake.slnx --verify-no-changes --severity warn
+
+      - name: No comments, LF line endings, version left to releases
+        run: python scripts/check_rules.py --base ${{ github.event.pull_request.base.sha }}
+
+      - name: Scripts compile
+        run: python -m compileall -q scripts

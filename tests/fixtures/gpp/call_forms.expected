@@ -1,0 +1,7 @@
+local a = ((3) * 2) * 2
+local b = function(...) return print(...) end
+local c = ( 5 ) * 2
+local s = [[ (1) * 2 inside long string ]]
+local t = { (1) * 2, (2) * 2 }
+local unbalanced = () * 2
+local spaced = () * 2 (7)

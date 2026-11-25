@@ -1,0 +1,5 @@
+before
+local inc = "included"
+after 42
+local inc = "included"
+end
