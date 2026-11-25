@@ -4,8 +4,7 @@
 
 [![Release](https://img.shields.io/github/v/release/TheExeDEV/lmake)](https://github.com/TheExeDEV/lmake/releases/latest)
 
-[![CI](https://github.com/TheExeDEV/lmake/actions/workflows/ci.yml/badge.svg)](https://github.com/TheExeDEV/lmake/actions/workflows/ci.yml) [![Release](https://github.com/TheExeDEV/lmake/actions/workflows/release.yml/badge.svg)](https://github.com/TheExeDEV/lmake/actions/workflows/release.yml) [![Coverage](https://github.com/TheExeDEV/lmake/actions/workflows/coverage.yml/badge.svg)](https://github.com/TheExeDEV/lmake/actions/workflows/coverage.yml) [![codecov](https://codecov.io/gh/TheExeDEV/lmake/graph/badge.svg)](https://codecov.io/gh/TheExeDEV/lmake)
-
+[![CI](https://github.com/TheExeDEV/lmake/actions/workflows/ci.yml/badge.svg)](https://github.com/TheExeDEV/lmake/actions/workflows/ci.yml) [![Release](https://github.com/TheExeDEV/lmake/actions/workflows/release.yml/badge.svg)](https://github.com/TheExeDEV/lmake/actions/workflows/release.yml) [![Coverage](https://github.com/TheExeDEV/lmake/actions/workflows/coverage.yml/badge.svg)](https://github.com/TheExeDEV/lmake/actions/workflows/coverage.yml)
 A build tool for Luau, written in C#: a preprocessor compatible with GPP and darklua-style require conversion in one
 executable.
 
